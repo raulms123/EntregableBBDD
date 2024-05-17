@@ -1,0 +1,102 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class Transacciones {
+
+    public void insertarOficinaYEmpleados() {
+        Connection conn = ConexionDB.getConnection();
+
+        try {
+            conn.setAutoCommit(false);
+
+            String insertOfficeQuery = "INSERT INTO offices (officeCode, city, phone, addressLine1, addressLine2, state, country, postalCode, territory) " +
+                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmtOffice = conn.prepareStatement(insertOfficeQuery);
+            pstmtOffice.setString(1, "8");
+            pstmtOffice.setString(2, "Sevilla");
+            pstmtOffice.setString(3, "123-456-789");
+            pstmtOffice.setString(4, "Direccion 1");
+            pstmtOffice.setString(5, "Direccion 2");
+            pstmtOffice.setString(6, "Sevilla");
+            pstmtOffice.setString(7, "Spain");
+            pstmtOffice.setString(8, "41001");
+            pstmtOffice.setString(9, "EMEA");
+            pstmtOffice.executeUpdate();
+
+            String insertEmployeeQuery = "INSERT INTO employees (employeeNumber, lastName, firstName, extension, email, officeCode, reportsTo, jobTitle) " +
+                                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmtEmployee = conn.prepareStatement(insertEmployeeQuery);
+            pstmtEmployee.setInt(1, 2001);
+            pstmtEmployee.setString(2, "Garcia");
+            pstmtEmployee.setString(3, "Juan");
+            pstmtEmployee.setString(4, "x2001");
+            pstmtEmployee.setString(5, "juan.garcia@empresa.com");
+            pstmtEmployee.setString(6, "8");
+            pstmtEmployee.setInt(7, 1002); // El jefe del nuevo empleado
+            pstmtEmployee.setString(8, "Sales Rep");
+            pstmtEmployee.executeUpdate();
+
+            pstmtEmployee.setInt(1, 2002);
+            pstmtEmployee.setString(2, "Lopez");
+            pstmtEmployee.setString(3, "Maria");
+            pstmtEmployee.setString(4, "x2002");
+            pstmtEmployee.setString(5, "maria.lopez@empresa.com");
+            pstmtEmployee.setString(6, "8");
+            pstmtEmployee.setInt(7, 1002); // El jefe del nuevo empleado
+            pstmtEmployee.setString(8, "Sales Rep");
+            pstmtEmployee.executeUpdate();
+
+            String insertCustomerQuery = "INSERT INTO customers (customerNumber, customerName, contactLastName, contactFirstName, phone, addressLine1, city, state, postalCode, country, salesRepEmployeeNumber, creditLimit) " +
+                                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmtCustomer = conn.prepareStatement(insertCustomerQuery);
+            pstmtCustomer.setInt(1, 5001);
+            pstmtCustomer.setString(2, "Nuevo Cliente S.L.");
+            pstmtCustomer.setString(3, "Perez");
+            pstmtCustomer.setString(4, "Carlos");
+            pstmtCustomer.setString(5, "987-654-321");
+            pstmtCustomer.setString(6, "Direccion Cliente 1");
+            pstmtCustomer.setString(7, "Sevilla");
+            pstmtCustomer.setString(8, "Sevilla");
+            pstmtCustomer.setString(9, "41002");
+            pstmtCustomer.setString(10, "Spain");
+            pstmtCustomer.setInt(11, 2001); // Asignado a Juan Garcia
+            pstmtCustomer.setDouble(12, 100000.00);
+            pstmtCustomer.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void insertarCategoriaYProducto() {
+        Connection conn = ConexionDB.getConnection();
+
+        try {
+            conn.setAutoCommit(false);
+
+            String insertCategoryQuery = "INSERT INTO productlines (productLine, textDescription, htmlDescription, image) " +
+                                         "VALUES (?, ?, ?, ?)";
+            PreparedStatement pstmtCategory = conn.prepareStatement(insertCategoryQuery);
+            pstmtCategory.setString(1, "NuevaCategoria");
+            pstmtCategory.setString(2, "Descripción de la nueva categoría");
+            pstmtCategory.setString(3, "<html>Descripción HTML</html>");
+            pstmtCategory.setBytes(4, null); // Suponiendo que no tenemos una imagen para insertar
+            pstmtCategory.executeUpdate();
+
+            String insertProductQuery = "INSERT INTO products (productCode, productName, productLine, productScale, productVendor, productDescription, quantityInStock, buyPrice, MSRP) " +
+                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmtProduct = conn.prepareStatement(insertProductQuery);
+            pstmtProduct.setString(1, "
