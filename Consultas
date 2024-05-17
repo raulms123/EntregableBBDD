@@ -1,0 +1,96 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Scanner;
+
+public class Consultas {
+
+    public void PagosCliente() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese el número de cliente: ");
+        int customerNumber = scanner.nextInt();
+
+        Connection conn = ConexionDB.getConnection();
+
+        try {
+            Statement stmt = conn.createStatement();
+            String query = "SELECT contactFirstName, contactLastName, country, SUM(amount) as totalPayments " +
+                           "FROM customers INNER JOIN payments ON customers.customerNumber = payments.customerNumber " +
+                           "WHERE customers.customerNumber = " + customerNumber;
+            ResultSet rs = stmt.executeQuery(query);
+
+            if (rs.next()) {
+                System.out.println("Nombre: " + rs.getString("contactFirstName"));
+                System.out.println("Apellido: " + rs.getString("contactLastName"));
+                System.out.println("País: " + rs.getString("country"));
+                System.out.println("Total de pagos: " + rs.getDouble("totalPayments"));
+            } else {
+                System.out.println("No se encontró el cliente con el número: " + customerNumber);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void InfoPedido() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese el número de pedido: ");
+        int orderNumber = scanner.nextInt();
+
+        Connection conn = ConexionDB.getConnection();
+
+        try {
+            String query = "SELECT productName, priceEach, quantityOrdered, (priceEach * quantityOrdered) as totalCost " +
+                           "FROM orderdetails INNER JOIN products ON orderdetails.productCode = products.productCode " +
+                           "WHERE orderNumber = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, orderNumber);
+            ResultSet rs = pstmt.executeQuery();
+
+            double total = 0;
+
+            while (rs.next()) {
+                System.out.println("Producto: " + rs.getString("productName"));
+                System.out.println("Precio: " + rs.getDouble("priceEach"));
+                System.out.println("Cantidad: " + rs.getInt("quantityOrdered"));
+                double cost = rs.getDouble("totalCost");
+                System.out.println("Coste Total: " + cost);
+                total += cost;
+            }
+
+            System.out.println("Coste total del pedido: " + total);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void DatosJefe() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese el número del empleado: ");
+        int employeeNumber = scanner.nextInt();
+
+        Connection conn = ConexionDB.getConnection();
+
+        try {
+            String query = "SELECT e2.firstName, e2.lastName " +
+                           "FROM employees e1 INNER JOIN employees e2 ON e1.reportsTo = e2.employeeNumber " +
+                           "WHERE e1.employeeNumber = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, employeeNumber);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                System.out.println("Nombre del jefe: " + rs.getString("firstName"));
+                System.out.println("Apellido del jefe: " + rs.getString("lastName"));
+            } else {
+                System.out.println("No se encontró el jefe para el empleado con el número: " + employeeNumber);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
